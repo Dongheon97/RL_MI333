@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.distributions import Normal
@@ -18,9 +19,16 @@ class ActorCritic(nn.Module):
                 nn.Linear(hidden_size, num_outputs),
         )
 
+        self.log_std = nn.Parameter(torch.ones(num_outputs) * std)
+
     def forward(self, x):
         value = self.critic(x)
         mu = self.actor(x)
-        dist = Normal(mu, 0.5)
+        #print(f'nn.Parameter: {nn.Parameter()}\nmu shape: {mu.shape}')
+        #print(f'self.log_std: {self.log_std}, {type(self.log_std)}')
+        std = self.log_std.exp().expand_as(mu)
+        #print(f'std: {std}')
+        #dist = Normal(mu, std.squeeze(0))
+        dist = Normal(mu, std)
         return dist, value
 

@@ -171,7 +171,7 @@ class MjCartPole():
         print(f'losses: {losses[-1]}')
     
 if __name__=="__main__":
-    PATH = '/Users/dongheon97/dev/Practice/mi333/simulator/xmls/cartpole.xml'
+    PATH = './xmls/cartpole.xml'
     num_frames = 1000
     batch_size = 32
     gamma = 0.99

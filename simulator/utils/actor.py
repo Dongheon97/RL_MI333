@@ -31,8 +31,8 @@ class ActorCritic(nn.Module):
         mu = self.actor(x)
         std = self.log_std.exp().expand_as(mu)
         # std = self.log_std.exp()
-        print(f'std: {std}')
-        print(f'std shape: {std.shape}, mu: {mu.shape}')
+        #print(f'mu: {mu}, std: {std}')
+        #print(f'mu shape: {mu.shape}, std: {std.shape}')
         dist = Normal(mu, std)
         return dist, value
 

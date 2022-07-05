@@ -19,8 +19,8 @@ class MjCartPole():
         self.sim = MjSim(xml_file)
         self.hidden_size = 256
         self.lr = 3e-4
-        self.USE_CUDA = torch.backends.mps.is_available()
-        self.device = torch.device('mps' if self.USE_CUDA else 'cpu')
+        self.USE_CUDA = torch.cuda.is_available()
+        self.device = torch.device('cuda' if self.USE_CUDA else 'cpu')
         # Actor-Critic
         self.model = ActorCritic(4, 1, self.hidden_size).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
@@ -33,18 +33,18 @@ class MjCartPole():
         return ordered
 
     def reorder_state(self, ordered):
-        qpos = [ordered[0][0], ordered[0][2]]
-        qvel = [ordered[0][1], ordered[0][3]]
+        qpos = [ordered[0], ordered[2]]
+        qvel = [ordered[1], ordered[3]]
         return np.array(qpos), np.array(qvel)
 
     def is_done(self, curr_state):
         # -pi/15 <= pole_angle(rad):curr_state[2] <= pi/15
         # -1.0 <= cart_position(m):curr_state[0] <= 1.0
-        if( (curr_state[0] >= -1.0 and curr_state[0] <= 1.0) \
-                and (curr_state[2] >= -0.20944 and curr_state[2] <= 0.20944)):
+        if( (curr_state[0][0] >= -1.0 and curr_state[0][0] <= 1.0) \
+                or (curr_state[0][2] >= -0.20944 and curr_state[0][2] <= 0.20944)):
             return False
         else:
-            print(f'done position: {curr_state[0]}, done angle: {curr_state[2]}')
+            #print(f'done position: {curr_state[0]}, done angle: {curr_state[2]}')
             return True
 
     def mj_step(self, givenAction):
@@ -54,11 +54,11 @@ class MjCartPole():
 
         obv = self.sim.get_state()
         next_state = self.order_state(obv[1], obv[2])
-        next_state = [next_state]
-        #next_state = self.to_tensor(next_state)
+        next_state = np.array(next_state)
+        next_state = np.expand_dims(next_state, axis=0)
         done = self.is_done(next_state)
         reward = 1
-        return np.array(next_state), reward, done
+        return next_state, reward, done
 
     def mj_reset(self):
         # -0.048 <= cart_position, cart_velocity, pole_angle, pole_angular_velocity <= +0.048
@@ -66,13 +66,15 @@ class MjCartPole():
         cv = random.uniform(-0.048, 0.048)
         pa = random.uniform(-0.048, 0.048)
         pv = random.uniform(-0.048, 0.048)
-        reset_state = [[cp, cv, pa, pv]]
+        reset_state = [cp, cv, pa, pv]
         qpos, qvel = self.reorder_state(reset_state)
         old_state = self.sim.get_state()
         new_state = MjSimState(old_state.time, qpos, qvel, old_state.act, old_state.udd_state)
         self.sim.set_state(new_state)
-        #reset_state = self.to_tensor(reset_state)
-        return np.array(reset_state)
+
+        reset_state = np.array(reset_state)
+        reset_state = np.expand_dims(reset_state, axis=0)
+        return reset_state
 
     def compute_gae(self, next_value, rewards, masks, values, gamma=0.99, tau=0.95):
         values = values + [next_value]
@@ -94,7 +96,7 @@ class MjCartPole():
     def ppo_update(self, ppo_epochs, mini_batch_size, states, actions, log_probs, returns, advantages, clip_param=0.2):
         for _ in range(ppo_epochs):
             for state, action, old_log_probs, return_, advantage \
-                    in ppo_iter(mini_vatch_size, states, actions, log_probs, returns, advantages):
+                    in self.ppo_iter(mini_batch_size, states, actions, log_probs, returns, advantages):
                 dist, value = self.model(state)
                 entropy = dist.entropy().mean()
                 new_log_probs = dist.log_prob(action)
@@ -113,9 +115,9 @@ class MjCartPole():
                 self.optimizer.step()
 
     def test_env(self, vis=False):
-        viewer = self.sim.MjViewer
+        #viewer = self.sim.MjViewer
         state = self.mj_reset()
-        if vis: viewer.render()
+        #if vis: viewer.render()
         done = False
         total_reward = 0
         while not done:
@@ -123,7 +125,7 @@ class MjCartPole():
             dist, _ = self.model(state)
             next_state, reward, done = self.mj_step(dist.sample().cpu().numpy()[0])
             state = next_state
-            if vis: viewer.render()
+            #if vis: viewer.render()
             total_reward += reward
         return total_reward
 
@@ -147,7 +149,7 @@ class MjCartPole():
         frame_idx = 0
         test_rewards = []
 
-        viewer = MjViewer(self.sim)
+        #viewer = MjViewer(self.sim)
         state = self.mj_reset()
         #print(f"state: {state}")
         while frame_idx < max_frames:
@@ -198,7 +200,7 @@ class MjCartPole():
             self.ppo_update(ppo_epochs, mini_batch_size, states, actions, log_probs, returns, advantage)
 
 if __name__=="__main__":
-    PATH = '/Users/dongheon97/dev/Practice/mi333/simulator/xmls/cartpole.xml'
+    PATH = './xmls/cartpole.xml'
     num_frames = 1000
     hidden_size = 256
     mini_batch_size = 5
