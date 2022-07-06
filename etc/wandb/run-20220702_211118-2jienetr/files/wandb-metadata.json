@@ -1,0 +1,16 @@
+{
+    "os": "macOS-12.4-arm64-arm-64bit",
+    "python": "3.10.4",
+    "heartbeatAt": "2022-07-02T12:11:19.440945",
+    "startedAt": "2022-07-02T12:11:18.651106",
+    "docker": null,
+    "cpu_count": 10,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/dongheon97/dev/mi333/mi333/simulator/cartpole_mujoco.py",
+    "codePath": "cartpole_mujoco.py",
+    "host": "Dongheon97ui-MacBookPro.local",
+    "username": "dongheon97",
+    "executable": "/Users/dongheon97/miniforge3/envs/mi333/bin/python3"
+}

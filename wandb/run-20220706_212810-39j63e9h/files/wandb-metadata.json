@@ -1,0 +1,22 @@
+{
+    "os": "macOS-12.4-arm64-arm-64bit",
+    "python": "3.10.4",
+    "heartbeatAt": "2022-07-06T12:28:11.234013",
+    "startedAt": "2022-07-06T12:28:10.436158",
+    "docker": null,
+    "cpu_count": 10,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/dongheon97/dev/RL_mi333/ActorCritic_MuJoCo.py",
+    "codePath": "ActorCritic_MuJoCo.py",
+    "git": {
+        "remote": "https://github.com/Dongheon97/RL_mi333.git",
+        "commit": "51a0116ca4fa41f619fc7125afef633fdcb18cd4"
+    },
+    "email": "jdd04063@gmail.com",
+    "root": "/Users/dongheon97/dev/RL_mi333",
+    "host": "Dongheon97ui-MacBookPro.local",
+    "username": "dongheon97",
+    "executable": "/Users/dongheon97/miniforge3/envs/mi333/bin/python3"
+}
