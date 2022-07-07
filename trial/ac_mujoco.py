@@ -12,7 +12,7 @@ import torch.optim as optim
 import torch.autograd as autograd
 import random, math
 import itertools as it
-from utils.ac import ActorCritic
+from models.actor2 import ActorCritic
 
 class MjCartPole():
     def __init__(self, xml_file):

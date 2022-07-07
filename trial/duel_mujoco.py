@@ -12,7 +12,7 @@ import torch.optim as optim
 import torch.autograd as autograd
 import random, math
 import itertools as it
-from utils.duel import DuelingDQN
+from models.duel import DuelingDQN
 from utils.replayBuffer import ReplayBuffer
 
 class MjCartPole():
